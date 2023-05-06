@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
+import { NotificationModule } from './module/notification/notification.module';
 
 function loadModules(): Array<any> {
   const importModule = [
@@ -8,15 +9,10 @@ function loadModules(): Array<any> {
       isGlobal: true,
       envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_MYSQL_HOST,
-      port: 3306,
-      username: process.env.DB_MYSQL_USERNAME,
-      password: process.env.DB_MYSQL_PASSWORD || '',
-      database: process.env.DB_MYSQL_NAME,
-      entities: [],
-    }),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.MONGO_URL}/${process.env.MONGO_DB_NAME}`,
+    ),
+    NotificationModule,
   ];
   return importModule;
 }
