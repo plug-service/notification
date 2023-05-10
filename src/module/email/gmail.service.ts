@@ -18,6 +18,13 @@ const SCOPES = [
 
 @Injectable()
 export class GmailService {
+  /**
+   * Note: dto.fromEmail is not used, it was fixed to emailImpersonate
+   * This is related to the key file, which is generated for a specific google workspace users
+   * Please read `Delegating domain-wide authority to the service account` section in README.md
+   * @param dto
+   * @returns
+   */
   async send(dto: SendEmailDto): Promise<StepResult> {
     try {
       const result = await this._send(dto);
