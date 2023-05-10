@@ -26,6 +26,14 @@ export class GmailController {
     };
   }
 
+  @ApiTags('email')
+  @ApiResponse({
+    status: 200,
+    type: BasicResponse,
+  })
+  @ApiOperation({
+    summary: 'Test send gmail',
+  })
   @Get('test')
   async test() {
     const sample: SendEmailDto = {
