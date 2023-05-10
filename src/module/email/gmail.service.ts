@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { google } from 'googleapis';
 import { SendEmailDto } from './dto/send-email.dto';
-import path from 'path';
+import { join } from 'path';
+import { existsSync } from 'fs';
+import { StepResult } from '../basic/basic.dto';
 
 // This service can impersonate as any other user in organization (google workspace)
 const emailImpersonate = 'support@ads-pro.site';
@@ -16,17 +18,32 @@ const SCOPES = [
 
 @Injectable()
 export class GmailService {
-  async send(dto: SendEmailDto) {
+  async send(dto: SendEmailDto): Promise<StepResult> {
+    try {
+      const result = await this._send(dto);
+      return {
+        isSuccess: true,
+        data: result,
+      };
+    } catch (e) {
+      return {
+        isSuccess: false,
+        message: e.message,
+      };
+    }
+  }
+
+  private async _send(dto: SendEmailDto) {
     const gmail = await this.getAuth();
 
-    const { toName, toEmail, subject, htmlBody, fromEmail, fromName } = dto;
+    const { toName, toEmail, subject, htmlBody, fromName } = dto;
 
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString(
       'base64',
     )}?=`;
 
     const messageParts = [
-      `From: ${fromName} <${fromEmail}>`,
+      `From: ${fromName} <${emailImpersonate}>`,
       `To: ${toName} <${toEmail}>`,
       'Content-Type: text/html; charset=utf-8',
       'MIME-Version: 1.0',
@@ -56,11 +73,18 @@ export class GmailService {
   }
 
   private async getAuth() {
-    // TODO:  check if the key file exists
+    const keyFile = join(process.cwd(), keyPath);
+
+    // check if key file exists
+    if (!existsSync(keyFile)) {
+      throw new Error(
+        `Key file not found. Please put the key file at ${keyPath}`,
+      );
+    }
 
     const JWT = google.auth.JWT;
     const authClient = new JWT({
-      keyFile: path.join(__dirname, keyPath),
+      keyFile,
       scopes: SCOPES,
       subject: emailImpersonate,
     });
