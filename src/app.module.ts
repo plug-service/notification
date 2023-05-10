@@ -10,12 +10,24 @@ function loadModules(): Array<any> {
       isGlobal: true,
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot(
-      `mongodb://${process.env.MONGO_URL}/${process.env.MONGO_DB_NAME}`,
-    ),
-    NotificationModule,
     EmailModule,
   ];
+
+  const isLoadNotificationModule =
+    process.env.ENABLE_MODULE_NOTIFICATION?.toLocaleLowerCase()?.trim() ===
+    'true';
+
+  if (isLoadNotificationModule) {
+    importModule.push(
+      ...[
+        NotificationModule,
+        MongooseModule.forRoot(
+          `mongodb://${process.env.MONGO_URL}/${process.env.MONGO_DB_NAME}`,
+        ),
+      ],
+    );
+  }
+
   return importModule;
 }
 @Module({
