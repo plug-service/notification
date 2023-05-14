@@ -34,7 +34,6 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 .env
-ecosystem.config.js
 
 # secret
 secret/google-service-account-key.json
